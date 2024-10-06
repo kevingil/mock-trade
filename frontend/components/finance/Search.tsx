@@ -1,14 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-
 import Link from "next/link"
-
-import {
-  Activity,
-  Search as SearchIcon,
-} from "lucide-react"
-
+import { Activity, Search as SearchIcon } from "lucide-react"
 import {
   CommandDialog,
   CommandEmpty,
@@ -25,42 +19,41 @@ type Result = {
 export function Search() {
   const [isFocused, setIsFocused] = useState(false);
   const [keyword, setKeyword] = useState("");
-  const [results, setResults] = useState<Result>();
+  const [results, setResults] = useState<Result[]>([]); 
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setIsFocused((open) => !open)
+        e.preventDefault();
+        setIsFocused((open) => !open);
       }
     }
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   const handleSearch = async (keyword: string) => {
     if (!keyword) {
-      return
+      setResults([]);
+      return;
     }
     try {
-      const response = await fetch(`http://localhost:5000/search-tickets?keyword=${keyword}`)
+      const response = await fetch(`http://localhost:5000/search-tickets?keyword=${keyword}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const data = await response.json()
-      setResults({ ticketName: data.ticketName, ticketCode: data.ticketCode })
+      const data: Result[] = await response.json(); 
+      setResults(data);
     } catch (error) {
-      console.error("Error fetching data:", error)
-      setResults({ ticketName: "", ticketCode: "" })
+      console.error("Error fetching data:", error);
+      setResults([]);
     }
   }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Input value changed:", event.target.value)
-    setKeyword(event.target.value)
-    handleSearch(event.target.value)
+    setKeyword(event.target.value);
+    handleSearch(event.target.value);
   }
-
 
   return (
     <div className="w-1/2 px-4">
@@ -72,26 +65,33 @@ export function Search() {
       />
       <SearchIcon onClick={() => setIsFocused(true)} className="md:hidden cursor-pointer" />
       <CommandDialog open={isFocused} onOpenChange={setIsFocused}>
-         <input className="w-full px-4 py-4 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-none hidden md:block" placeholder="Search..."
-         onChange={handleInputChange} value={keyword} />
+        <input
+          className="w-full px-4 py-4 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-none hidden md:block"
+          placeholder="Search..."
+          onChange={handleInputChange}
+          value={keyword}
+        />
         {isFocused && (
           <CommandList>
-          {results?.ticketName === "" || results === undefined || keyword === "" ? ( // Check if results array is empty
-            <CommandEmpty>No results found.</CommandEmpty>
-          ) : (
-            <CommandGroup heading="Results">
-                <CommandItem key={results.ticketCode}
-                className="cursor-pointer p-0">
-                <Link className="flex flex-row items-center rounded"
-                href={`/stock?ticker=${results.ticketCode}`}
-                onClick={() => setIsFocused(false)}>
-                  <Activity className="mx-4 h-4 w-4" />
-                  <span className="py-4">{results.ticketCode}: {results.ticketName}</span>
-                </Link>
-                </CommandItem>
-            </CommandGroup>
-          )}
-        </CommandList>
+            {results.length === 0 || keyword === "" || !results || !Array.isArray(results) ? (
+              <CommandEmpty>No results found.</CommandEmpty>
+            ) : (
+              <CommandGroup heading="Results">
+                {results.map((result) => (
+                  <CommandItem key={result.ticketCode} className="cursor-pointer p-0">
+                    <Link
+                      className="flex flex-row items-center rounded"
+                      href={`/stock?ticker=${result.ticketCode}`}
+                      onClick={() => setIsFocused(false)}
+                    >
+                      <Activity className="mx-4 h-4 w-4" />
+                      <span className="py-4">{result.ticketCode}: {result.ticketName}</span>
+                    </Link>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
         )}
       </CommandDialog>
     </div>

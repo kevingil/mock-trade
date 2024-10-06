@@ -1,5 +1,6 @@
 from app.models.schema import db, UserSchema, BalanceSchema, HoldingSchema
 from sqlalchemy.exc import NoResultFound
+from decimal import Decimal
 
 class User:
     def __init__(self, user_id):
@@ -12,9 +13,10 @@ class User:
             return None
 
     def add_balance(self, amount: float):
+        amount_decimal = Decimal(str(amount))
         balance = BalanceSchema.query.filter_by(user_id=self.user_id).first()
         if balance:
-            balance.balance += amount
+            balance.balance += amount_decimal  
         else:
             balance = BalanceSchema(user_id=self.user_id, balance=amount)
             db.session.add(balance)

@@ -101,7 +101,7 @@ export default function StockChart({ chartData, ticketCode, ticketName, currentP
   return (
     <div className="w-full space-y-4">
       <div className=" font-medium text-4xl">{ticketName}</div>
-      <h3 className="font-medium text-2xl">{currentPrice}</h3>
+      <h3 className="font-medium text-2xl">$ {currentPrice}</h3>
 
       <Line ref={chartRef} data={data} options={options} />
       
