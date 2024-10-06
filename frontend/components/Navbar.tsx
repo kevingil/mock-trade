@@ -40,10 +40,6 @@ const routeList: RouteProps[] = [
     label: "Investing",
   },
   {
-    href: "/account",
-    label: "Spending",
-  },
-  {
     href: "/history",
     label: "History",
   },

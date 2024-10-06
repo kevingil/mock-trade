@@ -80,7 +80,7 @@ export function Search() {
                 {results.map((result) => (
                   <CommandItem key={result.ticketCode} className="cursor-pointer p-0">
                     <Link
-                      className="flex flex-row items-center rounded"
+                      className="flex flex-row items-center rounded w-full"
                       href={`/stock?ticker=${result.ticketCode}`}
                       onClick={() => setIsFocused(false)}
                     >
