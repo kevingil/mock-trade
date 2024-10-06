@@ -72,9 +72,7 @@ export const tickers = pgTable('tickers', {
   country: varchar('country', { length: 100 }),
   ipoyear: varchar('ipoyear', { length: 4 }),
   industry: varchar('industry', { length: 100 }),
-  sector: varchar('sector', { length: 100 }),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  sector: varchar('sector', { length: 100 })
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({

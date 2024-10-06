@@ -16,6 +16,7 @@ interface TickerRow {
 }
 
 async function seed() {
+  // Create initial user
   const email = 'test@test.com';
   const password = 'admin123';
   const name = 'Test';
@@ -64,6 +65,7 @@ async function seed() {
 
   // Insert ticker data into the database
   for (const ticker of tickerData) {
+    console.log(`Inserting ticker: ${ticker.symbol}`);
     await db.insert(tickers).values(ticker);
   }
 
