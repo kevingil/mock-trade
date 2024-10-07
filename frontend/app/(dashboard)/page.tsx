@@ -22,9 +22,7 @@ export default function HomePage() {
                 <span className="block text-primary">Stock Trading</span>
               </h1>
               <p className="mt-3 text-base sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Launch your SaaS product in record time with our powerful,
-                ready-to-use template. Packed with modern technologies and
-                essential integrations.
+              Start trading stocks without any fees. Our platform is designed to give you the best trading experience with real-time market data and tools for managing your portfolio — all commission-free.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 {user ? (

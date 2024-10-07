@@ -12,7 +12,7 @@ export const Cta = () => {
             Your
             <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
               {" "}
-              Stocks & ETFs{" "}
+              Stocks{" "}
             </span>
             In One Place
           </h2>
