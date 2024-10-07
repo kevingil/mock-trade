@@ -124,7 +124,7 @@ export default function TicketPage() {
                 <div>
                   <div className='flex flex-row justify-between'>
                     <div className='text-sm'>Shares holding</div>
-                    <div className='text-sm font-medium flex flex-row items-center gap-2'>{sharesHolding ? sharesHolding : <Skeleton className='h-6 w-24' />}</div>
+                    <div className='text-sm font-medium flex flex-row items-center gap-2'>{sharesHolding ? sharesHolding : 0}</div>
                   </div>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export default function TicketPage() {
           bg-transparent shadow-sm'>
                 <div className='flex flex-col justify-between pb-6 border-b border-gray-600/20 dark:border-gray-600/50'>
                   <div className='text-sm'>Buying power</div>
-                  <div className='text-2xl font-medium flex flex-row items-center gap-2'>${buyingPower ? buyingPower : <Skeleton className='h-6 w-24' />}</div>
+                  <div className='text-2xl font-medium flex flex-row items-center gap-2'>${buyingPower ? buyingPower : 0.0}</div>
                 </div>
                 <div>
                   <div className='flex flex-row justify-between'>

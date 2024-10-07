@@ -11,14 +11,24 @@ def investing(user_id):
     total_investing = 0
 
     # Fetch user's holdings and balance
-    holdings = HoldingSchema.query.filter_by(user_id=user_id).all()
+    holdings = HoldingSchema.query.filter_by(user_id=user_id).all() or []
     balance = BalanceSchema.query.filter_by(user_id=user_id).first()
 
-    if not holdings or not balance:
-        return jsonify({"error": "User not found or no holdings available"}), 404
+    # Default balance to 0 if none found
+    balance_amount = Decimal(balance.balance) if balance else Decimal(0.0)
+
+    # If no holdings, return an empty valid response 
+    if not holdings:
+        response_data = {
+            "holdings": [],
+            "plot_points": [],
+            "total_investing": float(balance_amount),
+            "buying_power": float(balance_amount),
+        }
+        return jsonify(response_data)
 
     # Get stock data from yfinance
-    tickers = " ".join(holding.ticker for holding in holdings)  # Create a space-separated string of tickers
+    tickers = " ".join(holding.ticker for holding in holdings)  
     stock_data = yf.Tickers(tickers)
 
     # Prepare historical data dictionary
@@ -53,7 +63,7 @@ def investing(user_id):
                     jsonify({"error": f"No historical data found for {ticker}"}),
                     404,
                 )
-            hist_data[ticker] = hist  # Store historical data by ticker
+            hist_data[ticker] = hist 
         except Exception as e:
             return (
                 jsonify({"error": f"Error fetching data for {ticker}: {str(e)}"}),
@@ -66,14 +76,13 @@ def investing(user_id):
     # Calculate total value at each plot point (iterate over the first stock's dates)
     reference_ticker = holdings[0].ticker
     for date in hist_data[reference_ticker].index:
-        total_value = Decimal(balance.balance)
+        total_value = balance_amount  
         for holding in holdings:
             ticker = holding.ticker
-            if date in hist_data[ticker].index:  # Check if date exists for ticker
-                price = hist_data[ticker].loc[date]["Close"]  # Access price safely
+            if date in hist_data[ticker].index:
+                price = hist_data[ticker].loc[date]["Close"] 
                 total_value += holding.quantity * Decimal(price)
 
-        # Safely convert to float for JSON response
         try:
             response_data["plot_points"].append(
                 {"date": date.strftime("%Y-%m-%d"), "total_value": float(total_value)}
@@ -87,7 +96,7 @@ def investing(user_id):
     # Add detailed holdings information
     for holding in holdings:
         ticker = holding.ticker
-        stock = stock_data.tickers[ticker]  # Use the Tickers object
+        stock = stock_data.tickers[ticker]
         info = stock.info
         total_investing += info.get("currentPrice", 0) * float(holding.quantity)
         response_data["holdings"].append(
@@ -100,7 +109,7 @@ def investing(user_id):
             }
         )
 
-    response_data["total_investing"] = float(Decimal(total_investing) + balance.balance)
-    response_data["buying_power"] = float(balance.balance)
+    response_data["total_investing"] = float(Decimal(total_investing) + balance_amount)
+    response_data["buying_power"] = float(balance_amount)
 
     return jsonify(response_data)

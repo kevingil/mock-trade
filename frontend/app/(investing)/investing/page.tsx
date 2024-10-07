@@ -24,6 +24,7 @@ export default function InvestingPage() {
   const [buyingPower, setBuyingPower] = useState<number | undefined>(undefined);
   const [currentHolding, setCurrentHolding] = useState(0);
   const [dateRange, setDateRange] = useState('1d');
+  const [chartLoading, setChartLoading] = useState(true);
   const { user } = useUser();
 
   if (!user) {
@@ -61,6 +62,7 @@ export default function InvestingPage() {
           }));
 
           setStocks(formattedStocks);
+          setChartLoading(false);
         } else {
           console.error('Error fetching data:', data.error);
         }
@@ -85,7 +87,7 @@ export default function InvestingPage() {
       <section className="py-20 grid grid-cols-1 md:grid-cols-[1fr_400px] gap-4">
 
         <div className='w-full flex flex-col gap-8'>
-          {chartData.length > 0 ? (
+          {!chartLoading ? (
             <StockChart
               chartData={chartData}
               ticketCode={''}

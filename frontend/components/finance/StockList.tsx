@@ -22,7 +22,7 @@ export default function StockList({ stocks }: StockListProps) {
       </CardHeader>
       <div className="p-2">
         {stocks.length === 0 ? (
-          <p className="text-center text-gray-500">No stocks available.</p>
+          <p className="text-center text-gray-500 py-4 mb-8">No stocks available.</p>
         ) : (
           <ul className="space-y-2">
             {stocks.map((stock) => (
