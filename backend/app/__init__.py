@@ -1,8 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from app.config import setting
-from app.models.schema import db
-from app.models.user import User
+from app.models.schema import db, UserSchema
 from sqlalchemy import text
 
 
@@ -24,11 +23,14 @@ def register_blueprints(app: Flask):
     from app.controllers.search import search
     app.register_blueprint(search)
     
-    from app.controllers.transaction import trans
+    from app.controllers.trans import trans
     app.register_blueprint(trans)
     
     from app.controllers.user import user
     app.register_blueprint(user)
+    
+    from app.controllers.investing import inv
+    app.register_blueprint(inv)
 
 
 
@@ -40,7 +42,7 @@ def db_connection_test(app: Flask):
             result = db.session.execute(text('SELECT 1'))
             print(f"Database connection test succeeded, result: {result.fetchone()}")
 
-            user_count = db.session.query(User).count()
+            user_count = db.session.query(UserSchema).count()
             print(f"Number of users in the database: {user_count}")
 
         except Exception as e:

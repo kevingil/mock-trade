@@ -56,10 +56,10 @@ export function Search() {
   }
 
   return (
-    <div className="w-1/2 px-4">
+    <div className=" px-4">
       <input
         type="text"
-        className="w-full rounded-full px-4 py-2 hidden md:block"
+        className="w-full rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 hidden md:block focus:outline-none focus:ring-0"
         placeholder="Search..."
         onClick={() => setIsFocused(true)}
       />

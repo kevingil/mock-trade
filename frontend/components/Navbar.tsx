@@ -62,9 +62,9 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
 
   return (
     <header className="sticky border-b-[1px] top-0 z-40 overflow-auto w-full bg-white dark:border-b-slate-700 dark:bg-background">
-      <NavigationMenu className="mx-auto overflow-visible relative">
-        <NavigationMenuList className="container h-16 px-4 w-screen flex justify-between overflow-auto">
-          <NavigationMenuItem className="font-bold flex">
+      <NavigationMenu className="mx-auto overflow-visible relative w-full">
+        <NavigationMenuList className="container h-16 px-4 flex w-screen max-w-7xl overflow-auto justify-between">
+          <NavigationMenuItem className="font-bold items-start">
             <a
               rel="noreferrer noopener"
               href="/"
@@ -76,7 +76,7 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
           </NavigationMenuItem>
 
           <span className="flex md:hidden gap-2">
-            <Search/>
+            <Search />
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger className="px-2">
                 <Menu className="flex md:hidden h-5 w-5">
@@ -111,7 +111,7 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
                       </Link>
 
                       <form action={handleSignOut} className="w-full">
-                        <button type="submit" className={buttonVariants({ variant: "ghost" }) }>
+                        <button type="submit" className={buttonVariants({ variant: "ghost" })}>
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Sign out</span>
                         </button>
@@ -130,7 +130,7 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
                       </Button>
                     </>
                   )}
-                  <div className={buttonVariants({ variant: "ghost" }) }>
+                  <div className={buttonVariants({ variant: "ghost" })}>
                     <ToggleTheme />
                   </div>
 
@@ -140,11 +140,12 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
             </Sheet>
           </span>
 
-          
+
 
           <nav className="hidden md:flex gap-2">
-          <Search />
-            {routeList.map((route: RouteProps, i) => (
+            <Search />
+            { user &&
+            routeList.map((route: RouteProps, i) => (
               <a
                 rel="noreferrer noopener"
                 href={route.href}
@@ -158,21 +159,21 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
             ))}
           </nav>
 
-          <div className="hidden md:flex gap-2 items-center">
+          <div className="hidden md:flex flex-row w-content items-center gap-2">
             {user ? (
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <div className="cursor-pointer flex flex-row items-center gap-2 p-1 rounded-full
                   border-gray-300/50 dark:border-slate-700 border px-2 w-full">
-                  <Avatar className="size-9">
-                    <AvatarImage alt={user.name || ''} />
-                    <AvatarFallback>
-                      {user.name.split(' ').map((n: string) => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className='pr-2'> 
-                  { user.name  || "User" }
-                  </div>
+                    <Avatar className="size-9">
+                      <AvatarImage alt={user.name || ''} />
+                      <AvatarFallback>
+                        {user.name.split(' ').map((n: string) => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className='pr-2'>
+                      {user.name || "User"}
+                    </div>
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="flex flex-col gap-1">
@@ -198,7 +199,7 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
               </DropdownMenu>
             ) : (
               <div className='flex flex-row items-center gap-4'>
-                <Link href="/sign-in">Sign In</Link>
+                <Link href="/sign-in" className='w-14'>Sign In</Link>
 
                 <Button
                   asChild
@@ -208,6 +209,11 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
                 </Button>
               </div>
             )}
+            {!user &&
+            <div className='px-2'>
+              <ToggleTheme  />
+            </div>
+            }
           </div>
         </NavigationMenuList>
       </NavigationMenu>

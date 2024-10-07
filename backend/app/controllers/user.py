@@ -1,13 +1,12 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from app.models.user import User
-from app.models.schema import db
+from app.models.schema import db, TransactionSchema
 
 user = Blueprint('user-admin', __name__)
 
-@user.route('/balance', methods=['GET'])
-def get_balance():
-    user_id = request.args.get('user_id')
+@user.route('/balance/<int:user_id>', methods=['GET'])
+def get_balance(user_id):
     if not user_id:
         return jsonify({'error': 'Missing user_id parameter'}), 400
     
@@ -47,3 +46,21 @@ def deposit():
         db.session.rollback()
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
+
+@user.route('/history/<int:user_id>', methods=['GET'])
+def transaction_history(user_id):
+
+    transactions = TransactionSchema.query.filter_by(user_id=user_id).order_by(TransactionSchema.timestamp.desc()).limit(25).all()
+    
+    transactions_list = [
+        {
+            "ticker": txn.ticker,
+            "transaction_type": txn.transaction_type,
+            "quantity": str(txn.quantity),  
+            "price": str(txn.price),
+            "timestamp": txn.timestamp.isoformat(),
+        }
+        for txn in transactions
+    ]
+
+    return jsonify(transactions_list), 200

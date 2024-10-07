@@ -1,11 +1,16 @@
+'use client'
+
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CreditCard, Database, DollarSign } from 'lucide-react';
 import { Cta } from '@/components/home/Cta';
 import { About } from '@/components/home/About';
 import { HowItWorks } from '@/components/home/HowItWorks';
+import { useUser } from '@/lib/auth';
 
 
 export default function HomePage() {
+  const { user } = useUser();
+
   return (
     <main className='text-gray-800 dark:text-white'>
       <section className="py-20">
@@ -22,16 +27,42 @@ export default function HomePage() {
                 essential integrations.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <a
-                  href="/investing"
-                  target=""
-                >
-                  <Button className="bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/90 
-                    rounded-full text-lg px-8 py-6 inline-flex items-center justify-center">
-                    Get started
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
+                {user ? (
+                   <a
+                   href="/investing"
+                   target=""
+                 >
+                   <Button className="bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/90 
+                     rounded-full text-lg px-8 py-6 inline-flex items-center justify-center">
+                     Invest
+                     <ArrowRight className="ml-2 h-5 w-5" />
+                   </Button>
+                 </a>
+                )
+                : (
+                  <div className="flex flex-row gap-2">
+                  <a
+                    href="/sign-up"
+                    target=""
+                  >
+                    <Button className="bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/90 
+                      rounded-full text-lg px-8 py-6 inline-flex items-center justify-center">
+                      Sign Up
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </a>
+                  <a
+                    href="/sign-in"
+                    target=""
+                  >
+                    <Button className="bg-transparent text-black  dark:text-white border dark:border-white hover:bg-black/10 dark:hover:bg-white/10 
+                      rounded-full text-lg px-8 py-6 inline-flex items-center justify-center">
+                      Login
+                    </Button>
+                  </a>
+                  </div>
+                )}
+               
               </div>
             </div>
             <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">

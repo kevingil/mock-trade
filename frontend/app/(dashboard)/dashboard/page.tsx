@@ -18,7 +18,7 @@ export default function SpendingPage() {
           setMessage('Error: User not logged in');
           return;
         }
-        const response = await fetch(`http://localhost:5000/balance?user_id=${user.id}`);
+        const response = await fetch(`http://localhost:5000/balance/${user.id}`);
         if (response.ok) {
           const data = await response.json();
           setBalance(data.balance);
@@ -55,7 +55,7 @@ export default function SpendingPage() {
       if (response.ok) {
         setMessage('Deposit successful');
         // Refresh the balance after a successful deposit
-        const balanceResponse = await fetch(`http://localhost:5000/balance?user_id=${user.id}`);
+        const balanceResponse = await fetch(`http://localhost:5000/balance/${user.id}`);
         if (balanceResponse.ok) {
           const data = await balanceResponse.json();
           setBalance(data.balance);
@@ -109,7 +109,7 @@ export default function SpendingPage() {
                 <button
                   onClick={handleDeposit}
                   className="inline-flex w-24 h-12 justify-center items-center px-4 py-2 border border-transparent text-sm font-medium 
-            rounded-md shadow-sm text-black dark:text-white bg-zinc-500 hover:bg-zinc-600 focus:outline-none focus:ring-none focus:border-none"
+            rounded-md shadow-sm text-black dark:text-white bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400/60 dark:hover:bg-zinc-700 focus:outline-none focus:ring-none focus:border-none"
                 >
                   Add
                 </button>

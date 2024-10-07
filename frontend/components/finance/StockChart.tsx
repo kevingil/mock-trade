@@ -24,9 +24,9 @@ interface DateRange {
 
 export const dateRanges: DateRange[] = [
   { label: '1 Day', value: '1d' },
-  { label: '1 Week', value: '1w' },
-  { label: '1 Month', value: '1m' },
-  { label: '3 Months', value: '3m' },
+  { label: '1 Week', value: '5d' },
+  { label: '1 Month', value: '1mo' },
+  { label: '3 Months', value: '3mo' },
   { label: 'YTD', value: 'ytd' },
   { label: '5 Years', value: '5y' },
   { label: 'Max', value: 'max' },
@@ -99,9 +99,9 @@ export default function StockChart({ chartData, ticketCode, ticketName, currentP
 
 
   return (
-    <div className="w-full space-y-4">
-      <div className=" font-medium text-4xl">{ticketName}</div>
-      <h3 className="font-medium text-2xl">$ {currentPrice}</h3>
+    <div className="w-full">
+      <div className=" font-medium text-3xl">{ticketName}</div>
+      <div className="font-medium text-4xl mb-8 tracking-tight">${currentPrice}</div>
 
       <Line ref={chartRef} data={data} options={options} />
       

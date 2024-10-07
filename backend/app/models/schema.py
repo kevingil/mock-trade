@@ -34,6 +34,7 @@ class HoldingSchema(db.Model):
     ticker = Column(String(10), nullable=False)
     quantity = Column(DECIMAL(15, 6), nullable=False)
     average_price = Column(DECIMAL(15, 2), nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), nullable=False)
 
 class TransactionSchema(db.Model):

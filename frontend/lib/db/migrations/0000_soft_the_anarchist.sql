@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS "stock_holdings" (
   "ticker" varchar(10) NOT NULL,
   "quantity" decimal(15, 6) NOT NULL,
   "average_price" decimal(15, 2) NOT NULL,
+  "created_at" timestamp DEFAULT now() NOT NULL,
   "updated_at" timestamp DEFAULT now() NOT NULL,
   CONSTRAINT "stock_holdings_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE,
   CONSTRAINT "stock_holdings_user_ticker_unique" UNIQUE("user_id", "ticker")
