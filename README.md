@@ -10,42 +10,28 @@ We first need a blank postgres instance running. If you have Docker, you can sta
 ```bash
 docker compose up -d 
 ```
-this will allow us to use this connection string: `postgres://postgres:postgres@localhost:54322/postgres`
 
 
-Setup enviroments
+Setup enviroments (optional)
 
-If you want to use your own Postgres instance, modify these files.
+Flask and React will connect to the default docker instance `postgres://postgres:postgres@localhost:54322/postgres`. If you instead want to use your own docker provider, mofidy the connection strings here:
+
 
 ```bash
 # frontend/.env
 POSTGRES_URL=postgresql://***
-```
 
-```bash
 # backend/.env
 POSTGRES_URL=postgresql://***
 ```
 
-Install dependencies
-
-```bash
-cd frontend
-pnpm install
-```
-```bash
-cd backend
-python -m venv venv/
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-Building database
-
-To run migrations, run these commands:
+Setup frontend & database migrations
 
 ```bash
 cd frontend/
+pnpm install
+# Double check your blank postgres
+# instance is running
 pnpm db:migrate
 pnpm db:seed
 ```
@@ -55,15 +41,24 @@ This will create the following user data:
 - User: `test@test.com`
 - Name: `Test`
 - Password: `admin123`
+- Tickers: NASDAQ stock symbols cache
 
-And a tickers table with all NASDAQ stock symbols.
 
-
-Finally, run the apps.
+Now build and run the backend
 
 ```bash
-cd backend/
+cd backend
+python -m venv venv/
+source venv/bin/activate
+pip install -r requirements.txt
+# Double check the database
+# has been built via pnpm db:migrate
 flask run
+```
+
+
+Finally, run the frontend
+
 ```
 ```bash
 cd frontend/
