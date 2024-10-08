@@ -56,7 +56,7 @@ export function Search() {
   }
 
   return (
-    <div className=" px-4">
+    <div className="">
       <input
         type="text"
         className="w-full rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 hidden md:block focus:outline-none focus:ring-0"

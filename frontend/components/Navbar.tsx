@@ -75,88 +75,89 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
             </a>
           </NavigationMenuItem>
 
-          <span className="flex md:hidden gap-2">
+          <div className="flex items-center gap-4 flex-end">
             <Search />
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger className="px-2">
-                <Menu className="flex md:hidden h-5 w-5">
-                  <span className="sr-only">Menu Icon</span>
-                </Menu>
-              </SheetTrigger>
 
-              <SheetContent side={"right"}>
-                <SheetHeader>
-                  <SheetTitle className="font-bold text-xl">
-                    SellScaleHood
-                  </SheetTitle>
-                </SheetHeader>
-                <nav className="flex flex-col items-start gap-4 text-lg mt-4">
-                  {routeList.map(({ href, label }: RouteProps) => (
-                    <a
-                      rel="noreferrer noopener"
-                      key={label}
-                      href={href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={buttonVariants({ variant: "ghost" }) + " "}
-                    >
-                      {label}
-                    </a>
-                  ))}
+            <span className="flex md:hidden gap-2">
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <SheetTrigger className="px-2">
+                  <Menu className="flex md:hidden h-5 w-5">
+                    <span className="sr-only">Menu Icon</span>
+                  </Menu>
+                </SheetTrigger>
 
-                  {user ? (
-                    <>
-                      <Link href="/dashboard" className={buttonVariants({ variant: "ghost" }) + ""}>
-                        <Home className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-
-                      <form action={handleSignOut} className="w-full">
-                        <button type="submit" className={buttonVariants({ variant: "ghost" })}>
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Sign out</span>
-                        </button>
-                      </form>
-                    </>
-
-                  ) : (
-                    <>
-                      <Link href="/sign-in">Sign In</Link>
-
-                      <Button
-                        asChild
-                        className="bg-black dark:bg-white hover:bg-gray-800 text-white dark:text-black text-sm px-4 py-2 rounded-full"
+                <SheetContent side={"right"}>
+                  <SheetHeader>
+                    <SheetTitle className="font-bold text-xl">
+                      SellScaleHood
+                    </SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col items-start gap-4 text-lg mt-4">
+                    {routeList.map(({ href, label }: RouteProps) => (
+                      <a
+                        rel="noreferrer noopener"
+                        key={label}
+                        href={href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={buttonVariants({ variant: "ghost" }) + " "}
                       >
-                        <Link href="/sign-up">Sign Up</Link>
-                      </Button>
-                    </>
-                  )}
-                  <div className={buttonVariants({ variant: "ghost" })}>
-                    <ToggleTheme />
-                  </div>
+                        {label}
+                      </a>
+                    ))}
+
+                    {user ? (
+                      <>
+                        <Link href="/dashboard" className={buttonVariants({ variant: "ghost" }) + ""}>
+                          <Home className="mr-2 h-4 w-4" />
+                          <span>Dashboard</span>
+                        </Link>
+
+                        <form action={handleSignOut} className="w-full">
+                          <button type="submit" className={buttonVariants({ variant: "ghost" })}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Sign out</span>
+                          </button>
+                        </form>
+                      </>
+
+                    ) : (
+                      <>
+                        <Link href="/sign-in">Sign In</Link>
+
+                        <Button
+                          asChild
+                          className="bg-black dark:bg-white hover:bg-gray-800 text-white dark:text-black text-sm px-4 py-2 rounded-full"
+                        >
+                          <Link href="/sign-up">Sign Up</Link>
+                        </Button>
+                      </>
+                    )}
+                    <div className={buttonVariants({ variant: "ghost" })}>
+                      <ToggleTheme />
+                    </div>
 
 
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </span>
-
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </span>
+          </div>
 
 
           <nav className="hidden md:flex gap-2">
-            <Search />
-            { user &&
-            routeList.map((route: RouteProps, i) => (
-              <a
-                rel="noreferrer noopener"
-                href={route.href}
-                key={i}
-                className={`text-[17px] hover:text-primary px-2 hover:bg-transparent ${buttonVariants({
-                  variant: "ghost",
-                })}`}
-              >
-                {route.label}
-              </a>
-            ))}
+            {user &&
+              routeList.map((route: RouteProps, i) => (
+                <a
+                  rel="noreferrer noopener"
+                  href={route.href}
+                  key={i}
+                  className={`text-[17px] hover:text-primary px-2 hover:bg-transparent ${buttonVariants({
+                    variant: "ghost",
+                  })}`}
+                >
+                  {route.label}
+                </a>
+              ))}
           </nav>
 
           <div className="hidden md:flex flex-row w-content items-center gap-2">
@@ -210,9 +211,9 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
               </div>
             )}
             {!user &&
-            <div className='px-2'>
-              <ToggleTheme  />
-            </div>
+              <div className='px-2'>
+                <ToggleTheme />
+              </div>
             }
           </div>
         </NavigationMenuList>
