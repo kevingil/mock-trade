@@ -4,7 +4,6 @@ from app.config import setting
 from app.models.schema import db, UserSchema
 from sqlalchemy import text
 
-
 def create_app() -> Flask:
     app = Flask(__name__)
     CORS(app)

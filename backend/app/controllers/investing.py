@@ -2,6 +2,7 @@ from flask import jsonify, request, Blueprint
 import yfinance as yf
 from decimal import Decimal, InvalidOperation
 from app.models.schema import HoldingSchema, BalanceSchema
+from . import yf_set_interval
 
 inv = Blueprint("investing", __name__)
 
@@ -37,32 +38,12 @@ def investing(user_id):
     for holding in holdings:
         ticker = holding.ticker
         try:
-            interval = ''
-            match date_range:
-                case '1d':
-                    interval = '5m'
-                case '5d':
-                    interval = '15m'
-                case '1m':
-                    interval = '1h'
-                case '3m':
-                    interval = '1d'
-                case '6m':
-                    interval = '1d'
-                case '1y':
-                    interval = '1wk'
-                case 'max':
-                    interval = '1mo'
-                case _:
-                    interval = '1d'
+            interval = yf_set_interval(date_range)
             
             # Fetch historical data
             hist = stock_data.tickers[ticker].history(period=date_range, interval=interval)
             if hist.empty:
-                return (
-                    jsonify({"error": f"No historical data found for {ticker}"}),
-                    404,
-                )
+                raise Exception("Historical data not found for the given date range.")
             hist_data[ticker] = hist 
         except Exception as e:
             return (
@@ -111,5 +92,10 @@ def investing(user_id):
 
     response_data["total_investing"] = float(Decimal(total_investing) + balance_amount)
     response_data["buying_power"] = float(balance_amount)
+    response_data["delta"] = response_data["plot_points"][-1]["total_value"] - response_data["plot_points"][0]["total_value"]
+    response_data["delta_percent"] = (response_data["delta"] / response_data["total_investing"]) * 100
+    
+    
+    print(response_data['delta'])
 
     return jsonify(response_data)

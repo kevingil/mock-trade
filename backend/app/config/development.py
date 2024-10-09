@@ -1,4 +1,3 @@
-from app.config.base import *
 import os
 
 DEBUG = True
