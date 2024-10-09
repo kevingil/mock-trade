@@ -3,25 +3,20 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUser } from '@/lib/auth';
-import StockChart from '@/components/finance/StockChart';
+import StockChart, { StockData } from '@/components/finance/StockChart';
 import StockOrderForm from '@/components/finance/StockOrderForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-
-interface ChartData {
-  date: string;
-  price: number;
-}
 
 type DateRange = {
   code: string;
 };
 
 export default function TicketPage() {
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [stockData, setStockData] = useState<StockData | undefined>();
   const [dateRange, setDateRange] = useState<DateRange>({ code: '1d' });
-  const [ticketName, setTicketName] = useState('');
+  const [negativeDelta, setNegativeDelta] = useState(false);
   const [sharesHolding, setSharesHolding] = useState<number | undefined>(undefined);
   const [totalValue, setTotalValue] = useState<string | undefined>(undefined);
   const [stockCurrentPrice, setStockCurrentPrice] = useState<number | undefined>(undefined);
@@ -45,17 +40,21 @@ export default function TicketPage() {
         const data = await response.json();
 
         if (response.ok) {
-          console.log(data);
-          const formattedData = data.dates.map((date: string, index: number) => ({
-            date: date,
-            price: data.closing_prices[index],
-            name: data.name,
-          }));
-          setChartData(formattedData);
+          let currentPrice = data.plot_points[data.plot_points.length - 1].price.toFixed(2).toString();
+          const formattedData: StockData = {
+            tickerName: data.name,
+            tickerCode: ticker,
+            currentPrice: currentPrice,
+            delta: data.delta,
+            deltaPercentage: data.delta_percentage,
+            data: data.plot_points
+          };
+
+          setStockData(formattedData);
           setSharesHolding(data.shares_holding);
           setTotalValue(Number(data.total_value).toFixed(2));
-          setStockCurrentPrice(data.closing_prices[data.closing_prices.length - 1].toFixed(2).toString());
-          setTicketName(data.name);
+          setStockCurrentPrice(currentPrice);
+          setNegativeDelta(data.delta < 0);
         } else {
           console.error(data.error);
         }
@@ -95,12 +94,9 @@ export default function TicketPage() {
     <main className="text-gray-800 dark:text-white w-full max-w-7xl mx-auto">
       <section className="py-20 flex flex-row gap-4">
         <div className='w-full flex flex-col gap-4'>
-          {chartData.length > 0 ? (
+          {stockData && stockData?.data?.length > 0 ? (
             <StockChart
-              chartData={chartData}
-              ticketCode={ticker as string}
-              ticketName={ticketName}
-              currentPrice={stockCurrentPrice ? stockCurrentPrice.toString() : '0.00'}
+              stockData={stockData}
               onRangeChange={(range) => {
                 handleDateRangeChange(range);
               }}
@@ -148,6 +144,7 @@ export default function TicketPage() {
         <div className=" flex flex-col gap-4">
           <StockOrderForm
             tickerCode={ticker as string}
+            delta={stockData ? stockData.delta : 0.00}
             buyingPower={buyingPower ? buyingPower : 0.00}
             sharesHolding={sharesHolding ? sharesHolding : 0.00}
             userId={user?.id}
@@ -155,11 +152,14 @@ export default function TicketPage() {
           />
           {user?.id &&
             <div className='flex my-4'>
-              <Link href="/dashboard" className="text-sm text-muted-foreground w-full">
-                <Button className="bg-transparent hover:bg-primary/5 text-primary border-2 border-primary w-full rounded-full text-lg px-8 py-6 inline-flex items-center justify-center">
+              <Link href="/dashboard" className="text-sm w-full">
+                <Button className={`bg-transparent border-2 w-full rounded-full text-lg px-8 py-6 inline-flex items-center justify-center
+
+                ${negativeDelta ? 'hover:bg-red-600/5 text-red-600 border-red-600' : 'hover:bg-green-600/5 text-green-600 border-green-600'}`}>
                   Deposit Funds
                 </Button>
               </Link>
+
             </div>
           }
 

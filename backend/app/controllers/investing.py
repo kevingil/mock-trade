@@ -65,8 +65,10 @@ def investing(user_id):
                 total_value += holding.quantity * Decimal(price)
 
         try:
+            time_fmt = "%H:%M" if date_range == "1d" else "%m-%d-%Y"
+
             response_data["plot_points"].append(
-                {"date": date.strftime("%Y-%m-%d"), "total_value": float(total_value)}
+                {"date": date.strftime(time_fmt), "price": float(total_value)}
             )
         except InvalidOperation:
             return (
@@ -92,10 +94,7 @@ def investing(user_id):
 
     response_data["total_investing"] = float(Decimal(total_investing) + balance_amount)
     response_data["buying_power"] = float(balance_amount)
-    response_data["delta"] = response_data["plot_points"][-1]["total_value"] - response_data["plot_points"][0]["total_value"]
+    response_data["delta"] = response_data["plot_points"][-1]["price"] - response_data["plot_points"][0]["price"]
     response_data["delta_percent"] = (response_data["delta"] / response_data["total_investing"]) * 100
-    
-    
-    print(response_data['delta'])
 
     return jsonify(response_data)

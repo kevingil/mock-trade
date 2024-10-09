@@ -17,6 +17,7 @@ interface StockOrderFormProps {
   buyingPower: number
   sharesHolding: number
   userId: number | undefined
+  delta: number
 }
 
 enum TransactionType {
@@ -32,13 +33,12 @@ export type StockOrderRequest = {
   userId: number
 }
 
-export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, sharesHolding, userId }: StockOrderFormProps) {
+export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, sharesHolding, delta, userId }: StockOrderFormProps) {
   const [buyType, setBuyType] = useState<'dollars' | 'shares'>('dollars')
   const [transactionType, setTransactionType] = useState<TransactionType>(TransactionType.BUY)
   const [amount, setAmount] = useState<string>('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   let estimatedQuantity = buyType === 'dollars' ? Number(amount) / tickerPrice : undefined
   let estimatedAmount = buyType === 'shares' ? Number(amount) * tickerPrice : undefined
@@ -73,7 +73,7 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
         throw new Error(errorData.error || 'Transaction failed')
       }
       window.location.reload();
-      
+
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -90,10 +90,23 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
         <CardFooter>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full" onClick={handleReviewOrder}
-                {...(transactionType === TransactionType.BUY ?
-                  buyType === 'dollars'? { disabled: Number(amount) > buyingPower } : { disabled: Number(amount) > buyingPower / tickerPrice }
-                  : buyType === 'shares'? { disabled: Number(amount) > sharesHolding } : { disabled: Number(amount) > sharesHolding * tickerPrice })}>Review Order</Button>
+              <Button
+                className={`w-full font-semibold rounded-xl
+                  ${delta < 0 ? 'hover:bg-red-600 bg-red-500' : ''}`}
+                onClick={handleReviewOrder}
+                disabled={
+                  !amount || Number(amount) === 0 || // Disable if amount is 0 or empty
+                  (transactionType === TransactionType.BUY
+                    ? (buyType === 'dollars'
+                      ? Number(amount) > buyingPower
+                      : Number(amount) > buyingPower / tickerPrice)
+                    : (buyType === 'shares'
+                      ? Number(amount) > sharesHolding
+                      : Number(amount) > sharesHolding * tickerPrice)
+                  )
+                }
+              >
+                Review Order</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -160,15 +173,17 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
     <Card className="w-full md:w-[400px] text-black dark:text-white h-fit">
       <div className="flex border-b-2 my-2 mb-4 px-2">
         <button
-          className={`px-4 py-3 text-center text-sm font-bold border-b-2 ${transactionType === TransactionType.BUY ? 'border-primary text-primary font-bold' : 'border-transparent '
-            }`}
+          className={`px-4 py-3 text-center text-sm font-bold border-b-2 
+            ${transactionType === TransactionType.BUY && delta > 0 ? 'border-green-500 text-primary font-bold' : 'border-transparent '}
+            ${transactionType === TransactionType.BUY && delta < 0 ? ' border-red-500 text-red-500 font-bold' : 'border-transparent '}`}
           onClick={() => setTransactionType(TransactionType.BUY)}
         >
           Buy {tickerCode}
         </button>
         <button
-          className={`px-4 py-3 text-center text-sm font-bold border-b-2 ${transactionType === TransactionType.SELL ? ' border-primary text-primary font-bold' : 'border-transparent '
-            }`}
+          className={`px-4 py-3 text-center text-sm font-bold border-b-2 
+            ${transactionType === TransactionType.SELL && delta > 0 ? ' border-green-500 text-primary font-bold' : 'border-transparent '}
+            ${transactionType === TransactionType.SELL && delta < 0 ? ' border-red-500 text-red-500 font-bold' : 'border-transparent '}`}
           onClick={() => setTransactionType(TransactionType.SELL)}
         >
           Sell {tickerCode}
@@ -197,6 +212,7 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
             placeholder={buyType === 'dollars' ? 'Enter dollar amount' : 'Enter number of shares'}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            className={`${delta < 0 ? 'focus:border-red-500' : ''}`}
           />
         </div>
         {buyType === 'dollars' && estimatedQuantity

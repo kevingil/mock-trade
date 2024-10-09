@@ -22,12 +22,11 @@ def get_stock_chart():
             jsonify({"error": "ticketCode and dateRange are required parameters"}),
             400,
         )
-    
+
     # Set variables
     interval = yf_set_interval(date_range)
     ticker = None
     current_price = None
-
 
     # Fetch stock data using yfinance
     try:
@@ -58,9 +57,8 @@ def get_stock_chart():
             else:
                 raise Exception("No historical data available for the given date range")
 
-
     except Exception as e:
-        return jsonify({"error": str(e)}), 500    
+        return jsonify({"error": str(e)}), 500
 
     # Calculate shares_holding and portfolio_percentage
     holdings = HoldingSchema.query.filter_by(
@@ -73,22 +71,30 @@ def get_stock_chart():
     time_fmt = "%H:%M" if date_range == "1d" else "%m-%d-%Y"
     delta = stock_data["Close"].iloc[-1] - stock_data["Close"].iloc[0]
     
+    plot_points = []
+
+    for index, row in stock_data.iterrows():
+        plot_points.append(
+            {
+                "date": index.strftime(time_fmt),
+                "price": row["Close"],
+            }
+        )
+
     chart_data = {
-        "dates": stock_data.index.strftime(time_fmt).tolist(),
-        "closing_prices": stock_data["Close"].tolist(),
+        "plot_points": plot_points,
         "name": ticker.info.get("longName", "Unknown"),
         "shares_holding": shares_holding,
         "total_value": shares_holding * Decimal(current_price),
         "delta": delta,
-        "delta_percentage": (delta / current_price) * 100
+        "delta_percentage": (delta / current_price) * 100,
     }
-    
-    print(chart_data["delta_percentage"])
-        
+
+
     return jsonify(chart_data)
 
 
-'''
+"""
 
 ticker.info example
 
@@ -333,4 +339,4 @@ ticker.info example
 }
 
 
-'''
+"""

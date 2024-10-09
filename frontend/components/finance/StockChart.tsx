@@ -6,14 +6,12 @@ import { Line } from 'react-chartjs-2'
 import { ChartData, ChartOptions } from 'chart.js'
 import { RadioGroupButton, RadioGroupItem } from "@/components/ui/radio-group-button"
 import { Label } from "@/components/ui/label"
+import { ne } from "drizzle-orm"
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 interface StockChartProps {
-  chartData: { date: string; price: number }[]
-  ticketCode: string
-  ticketName: string
-  currentPrice: string 
+  stockData: StockData
   onRangeChange: (range: string) => void
 }
 
@@ -32,22 +30,31 @@ export const dateRanges: DateRange[] = [
   { label: 'Max', value: 'max' },
 ]
 
-const positiveColor: string = 'hsl(142.1 76.2% 36.3%)';
-const negativeColor: string = 'hsl(0 66.7% 40.2%)';
+export interface StockData {
+  tickerName: string
+  tickerCode: string
+  currentPrice: number
+  delta: number
+  deltaPercentage: number
+  data: { date: string; price: number }[]
+}
 
-export default function StockChart({ chartData, ticketCode, ticketName, currentPrice, onRangeChange }: StockChartProps) {
+
+const positiveColor: string = 'hsl(142.1 76.2% 36.3%)';
+const negativeColor: string = 'hsl(19 100% 50%)';
+
+export default function StockChart({ stockData, onRangeChange }: StockChartProps) {
   const [selectedRange, setSelectedRange] = useState('1d')
   const chartRef = useRef<Chart<"line">>(null)
-  const [lineColor, setLineColor] = useState<string>(positiveColor)
-  
+
   // Data for Chart.js
   const data: ChartData<"line"> = {
-    labels: chartData.map(dataPoint => dataPoint.date),
+    labels: stockData.data.map(dataPoint => dataPoint.date),
     datasets: [
       {
-        label: `${ticketName} (${ticketCode})`,
-        data: chartData.map(dataPoint => dataPoint.price),
-        borderColor: lineColor,
+        label: `${stockData.tickerName} (${stockData.tickerCode})`,
+        data: stockData.data.map(dataPoint => dataPoint.price),
+        borderColor: stockData.delta < 0 ? negativeColor : positiveColor,
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         fill: true,
         tension: 0.3,
@@ -79,7 +86,7 @@ export default function StockChart({ chartData, ticketCode, ticketName, currentP
       },
       title: {
         display: false,
-        text: `Stock Prices: ${ticketName} (${ticketCode})`,
+        text: `Stock Prices: ${stockData.tickerName} (${stockData.tickerCode})`,
       },
     },
   };
@@ -88,10 +95,10 @@ export default function StockChart({ chartData, ticketCode, ticketName, currentP
     if (chartRef.current) {
       chartRef.current.update();
     }
-  }, [chartData]);
+  }, [stockData]);
 
   // Handle Date Range Change (can be a form or custom component)
-  const handleDateRangeChange = ( range: string) => {
+  const handleDateRangeChange = (range: string) => {
     setSelectedRange(range);
     onRangeChange(range);
   };
@@ -100,11 +107,11 @@ export default function StockChart({ chartData, ticketCode, ticketName, currentP
 
   return (
     <div className="w-full">
-      <div className=" font-medium text-3xl">{ticketName}</div>
-      <div className="font-medium text-4xl mb-8 tracking-tight">${currentPrice}</div>
+      <div className=" font-medium text-3xl">{stockData.tickerName}</div>
+      <div className="font-medium text-4xl mb-8 tracking-tight">${stockData.currentPrice}</div>
 
       <Line ref={chartRef} data={data} options={options} />
-      
+
       <RadioGroupButton
         value={selectedRange}
         onValueChange={handleDateRangeChange}
@@ -114,10 +121,18 @@ export default function StockChart({ chartData, ticketCode, ticketName, currentP
           <div key={range.value} className="flex items-center space-x-2">
             <RadioGroupItem value={range.value} id={range.value}
               className="" />
-            <Label htmlFor={range.value}
-            className={"cursor-pointer hover:text-primary py-4"
-              + (selectedRange === range.value ? " text-primary border-primary border-b-2" : "")
-            }>{range.label}</Label>
+            {stockData.delta < 0 ?
+              <Label htmlFor={range.value}
+                className={"cursor-pointer hover:text-red-500 py-4"
+                  + (selectedRange === range.value ? " text-red-500 border-red-500 border-b-2" : "")
+                }>{range.label}</Label>
+              :
+              <Label htmlFor={range.value}
+                className={"cursor-pointer hover:text-primary py-4"
+                  + (selectedRange === range.value ? " text-primary border-primary border-b-2" : "")
+                }>{range.label}</Label>
+
+            }
           </div>
         ))}
       </RadioGroupButton>

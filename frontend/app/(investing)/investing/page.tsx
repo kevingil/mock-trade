@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import StockChart from '@/components/finance/StockChart';
+import StockChart, { StockData } from '@/components/finance/StockChart';
 import StockList from '@/components/finance/StockList';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -19,10 +19,10 @@ type Holdings = {
 }
 
 export default function InvestingPage() {
-  const [chartData, setChartData] = useState([]);
+  const [stockData, setStockData] = useState<StockData | undefined>();
   const [stocks, setStocks] = useState<Stock[]>([]);
+  const [negativeDelta, setNegativeDelta] = useState(false);
   const [buyingPower, setBuyingPower] = useState<number | undefined>(undefined);
-  const [currentHolding, setCurrentHolding] = useState(0);
   const [dateRange, setDateRange] = useState('1d');
   const [chartLoading, setChartLoading] = useState(true);
   const { user } = useUser();
@@ -39,17 +39,19 @@ export default function InvestingPage() {
         const data = await response.json();
 
         if (response.ok) {
-          // Map plot_points to chartData format
-          const formattedChartData = data.plot_points.map((point: { date: string, total_value: number }) => ({
-            date: point.date,
-            price: point.total_value,
-          }));
+          const formattedChartData: StockData = {
+            tickerName: 'Investing',
+            tickerCode: '',
+            delta: data.delta,
+            deltaPercentage: data.delta_percentage,
+            currentPrice: data.total_investing.toFixed(2),
+            data: data.plot_points
+          };
 
           // Set chart data for the StockChart component
-          setChartData(formattedChartData);
+          setStockData(formattedChartData);
 
           // Set the total value of current holdings
-          setCurrentHolding(data.total_investing.toFixed(2));
           setBuyingPower(data.buying_power.toFixed(2));
 
           // Map backend data to Stock[]
@@ -87,12 +89,9 @@ export default function InvestingPage() {
       <section className="py-20 grid grid-cols-1 md:grid-cols-[1fr_400px] gap-4">
 
         <div className='w-full flex flex-col gap-8'>
-          {!chartLoading ? (
+          {stockData && !chartLoading ? (
             <StockChart
-              chartData={chartData}
-              ticketCode={''}
-              ticketName={'Investing'}
-              currentPrice={currentHolding.toString()}
+              stockData={stockData}
               onRangeChange={handleDateRangeChange}
             />
           ) : (
@@ -107,7 +106,7 @@ export default function InvestingPage() {
           bg-zinc-50 dark:bg-zinc-800 shadow'>
             <div className='flex flex-row justify-between pb-6 border-b border-gray-600/20 dark:border-gray-600/50'>
               <div className='font-bold text-sm'>Buying power</div>
-              <div className='text-2xl font-medium flex flex-row items-center gap-2'>${buyingPower? buyingPower : <Skeleton className='h-6 w-24' /> }</div>
+              <div className='text-2xl font-medium flex flex-row items-center gap-2'>${buyingPower ? buyingPower : <Skeleton className='h-6 w-24' />}</div>
             </div>
             <div className='flex my-4'>
               <Link href="/dashboard" className="text-sm text-muted-foreground ml-auto">
