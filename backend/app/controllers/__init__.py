@@ -1,4 +1,13 @@
+from pydantic import BaseModel
 
+
+class BaseRequest(BaseModel):
+    user_id: int
+
+
+class GraphPoint(BaseModel):
+    date: str
+    price: float
 
 
 # With date range  code as input, this returns
@@ -10,11 +19,11 @@ def yf_set_interval(date_range: str):
             interval = '5m'
         case '5d':
             interval = '15m'
-        case '1m':
+        case '1mo':
             interval = '1h'
-        case '3m':
+        case '3mo':
             interval = '1d'
-        case '6m':
+        case '6mo':
             interval = '1d'
         case '1y':
             interval = '1wk'

@@ -3,11 +3,26 @@ import yfinance as yf
 import json
 import datetime
 from decimal import Decimal
+from typing import List
+from pydantic import BaseModel
+from app.controllers import BaseRequest, GraphPoint
 from app.models.schema import HoldingSchema
 from . import yf_set_interval
 
-tickets = Blueprint("tickets", __name__)
+class StockDataRequest(BaseRequest):
+    ticket_code: str
+    date_range: str
 
+class StockDataResponse(BaseModel):
+    name: str
+    plot_points: List[GraphPoint]
+    current_price: Decimal
+    shares_holding: Decimal
+    total_value: Decimal
+    delta: Decimal
+    delta_percentage: Decimal
+
+tickets = Blueprint("tickets", __name__)
 
 @tickets.route("/get-stock-data", methods=["GET"])
 def get_stock_chart():
@@ -75,23 +90,23 @@ def get_stock_chart():
 
     for index, row in stock_data.iterrows():
         plot_points.append(
-            {
-                "date": index.strftime(time_fmt),
-                "price": row["Close"],
-            }
+            GraphPoint(
+                date=index.strftime(time_fmt),
+                price=row["Close"],
+            )
         )
+        
+    stock_data = StockDataResponse(
+        name=ticker.info.get("longName", "Unknown"),
+        plot_points=plot_points,
+        current_price=current_price,
+        shares_holding=shares_holding,
+        total_value=shares_holding * Decimal(current_price),
+        delta=delta,
+        delta_percentage=(delta / current_price) * 100,
+    )
 
-    chart_data = {
-        "plot_points": plot_points,
-        "name": ticker.info.get("longName", "Unknown"),
-        "shares_holding": shares_holding,
-        "total_value": shares_holding * Decimal(current_price),
-        "delta": delta,
-        "delta_percentage": (delta / current_price) * 100,
-    }
-
-
-    return jsonify(chart_data)
+    return stock_data.json(), 200
 
 
 """
