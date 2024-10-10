@@ -9,13 +9,18 @@ import { Stock } from '@/components/finance/StockList';
 import { useUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { deleteAccount } from '@/app/(login)/actions';
 
-type Holdings = {
+interface HoldingResponse {
   ticker: string;
+  name: string;
   quantity: number;
   average_price: number;
   current_price: number;
-  name: string;
+  previous_close: number;
+  opening_price: number;
+  delta: number;
+  delta_percentage: number;
 }
 
 export default function InvestingPage() {
@@ -55,12 +60,14 @@ export default function InvestingPage() {
           setBuyingPower(data.buying_power.toFixed(2));
 
           // Map backend data to Stock[]
-          const formattedStocks: Stock[] = data.holdings.map((holding: Holdings) => ({
+          const formattedStocks: Stock[] = data.holdings.map((holding: HoldingResponse) => ({
             ticker: holding.ticker,
             quantity: holding.quantity,
             averagePrice: holding.average_price,
             currentPrice: holding.current_price,
-            name: holding.name
+            name: holding.name,
+            delta: holding.delta,
+            deltaPercentage: holding.delta_percentage
           }));
 
           setStocks(formattedStocks);
