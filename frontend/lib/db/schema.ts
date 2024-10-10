@@ -5,6 +5,8 @@ import {
   text,
   timestamp,
   integer,
+  decimal,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -75,15 +77,49 @@ export const tickers = pgTable('tickers', {
   sector: varchar('sector', { length: 100 })
 });
 
+export const userBalances = pgTable('user_balances', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  balance: decimal('balance', { precision: 15, scale: 2 }).notNull().default('0'),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const stockHoldings = pgTable('stock_holdings', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  ticker: varchar('ticker', { length: 10 }).notNull(),
+  quantity: decimal('quantity', { precision: 15, scale: 6 }).notNull(),
+  averagePrice: decimal('average_price', { precision: 15, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    userTickerUnique: uniqueIndex('stock_holdings_user_ticker_unique').on(table.userId, table.ticker),
+  };
+});
+
+export const stockTransactions = pgTable('stock_transactions', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  ticker: varchar('ticker', { length: 10 }).notNull(),
+  transactionType: varchar('transaction_type', { length: 4 }).notNull(),
+  quantity: decimal('quantity', { precision: 15, scale: 6 }).notNull(),
+  price: decimal('price', { precision: 15, scale: 2 }).notNull(),
+  timestamp: timestamp('timestamp').notNull().defaultNow(),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   invitations: many(invitations),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   teamMembers: many(teamMembers),
   invitationsSent: many(invitations),
+  userBalance: one(userBalances),
+  stockHoldings: many(stockHoldings),
+  stockTransactions: many(stockTransactions),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -131,6 +167,12 @@ export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 export type Ticker = typeof tickers.$inferSelect;
 export type NewTicker = typeof tickers.$inferInsert;
+export type UserBalance = typeof userBalances.$inferSelect;
+export type NewUserBalance = typeof userBalances.$inferInsert;
+export type StockHolding = typeof stockHoldings.$inferSelect;
+export type NewStockHolding = typeof stockHoldings.$inferInsert;
+export type StockTransaction = typeof stockTransactions.$inferSelect;
+export type NewStockTransaction = typeof stockTransactions.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;
