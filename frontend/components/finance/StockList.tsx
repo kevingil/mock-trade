@@ -2,8 +2,7 @@ import Link from 'next/link'
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useEffect, useState } from 'react';
-import { Sparkles } from 'lucide-react'
-import OpenAI from "openai";
+import { Sparkles } from 'lucide-react';
 
 export interface Stock {
   ticker: string;
@@ -20,72 +19,87 @@ interface StockListProps {
   stocks: Stock[]
 }
 
-const openai = new OpenAI({
-  apiKey: '',
-  dangerouslyAllowBrowser: true
-});
+interface AdviceData {
+  answers: {
+    answer1: string;
+    answer2: string;
+    answer3: string[];
+  };
+  summary: string;
+}
+
 
 export default function StockList({ stocks }: StockListProps) {
   const [adviceDialogOpen, setAdviceDialogOpen] = useState(false);
-  const [adviceCompletion, setAdviceCompletion] = useState<string | undefined>(undefined);
+  const [adviceData, setAdviceData] = useState<AdviceData | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (adviceDialogOpen && adviceCompletion === undefined) {
-      getAdvice();
+    if (adviceDialogOpen && !adviceData && !loading) {
+      setLoading(true);
+      fetch('http://localhost:5000/stock-advice')
+        .then(response => response.json())
+        .then((data: AdviceData) => {
+          setAdviceData(data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching advice:', error);
+          setLoading(false);
+        });
     }
-  }, [adviceDialogOpen]);
+  }, [adviceDialogOpen, adviceData]);
 
-  const getAdvice = async () => {
-    try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "your a helpful financial assistant, help me make an informed decision based on my portfolio. \n " +
-            "Please respond with the following bullet points in markdown. \n" +
-              "1. what is good about my portfolio\n" +
-              "2. what can be improved\n" +
-              "3. exact stock ticker to buy\n" +
-              "Please use 1 sentence each by bullet points. Only use the proviced context."
-          },
-          {
-            role: "user",
-            content: `Here's my stock portfolio: ${JSON.stringify(stocks)}. What's your advice?`
-          }
-        ],
-      });
+  const renderAdvice = () => {
+    if (loading) return <p>Loading advice...</p>;
+    if (!adviceData) return <p>Failed to load advice. Please try again.</p>;
 
-      setAdviceCompletion(completion.choices[0]?.message?.content || "No advice available.");
-    } catch (error) {
-      console.error("Error fetching advice:", error);
-      setAdviceCompletion("Error fetching advice. Please try again.");
-    }
+    return (
+      <div className="space-y-4">
+        <h3 className="font-bold">Summary</h3>
+        <p>{adviceData.summary}</p>
+        <h3 className="font-bold">Strengths</h3>
+        <p>{adviceData.answers.answer1}</p>
+        <h3 className="font-bold">Areas of Concern</h3>
+        <p>{adviceData.answers.answer2}</p>
+        <h3 className="font-bold">Recommended Stocks</h3>
+        
+        <div className='grid grid-cols-2 gap-2'>
+          {adviceData.answers.answer3.map((ticker, index) => (
+            <div key={index}>
+              <Link href={`/stock?ticker=${ticker}`}
+                className="text-green-500 font-bold hover:underline w-full">
+                {ticker}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <Card className="w-full md:max-w-[400px] bg-transparent">
+    <Card className="w-full md:max-w-[300px] bg-transparent">
       <CardHeader className='flex flex-row justify-between pb-0 items-center'>
         <CardTitle className='text-lg'>Your Stocks</CardTitle>
-      <div className='mt-0'>
+
         <Dialog open={adviceDialogOpen} onOpenChange={setAdviceDialogOpen}>
           <DialogTrigger asChild>
-            <button className='w-full py-2 px-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 border border-indigo-300 transition-colors'>
-              <Sparkles size={15} strokeWidth={1.5}/>
-            </button>
+            <div className=''>
+              <button className='w-full py-2 px-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 border border-indigo-300 transition-colors'>
+                <Sparkles size={15} strokeWidth={1.5} />
+              </button>
+            </div>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className='top-1/2'>
             <DialogHeader>
               <DialogTitle>Advice</DialogTitle>
             </DialogHeader>
-            <div>
-              <p>
-                {adviceCompletion ? adviceCompletion : 'Loading...'}
-              </p>
+            <div className="mt-4 min-h-[500px]">
+              {renderAdvice()}
             </div>
           </DialogContent>
         </Dialog>
-      </div>
       </CardHeader>
       <div className="p-2">
         {stocks.length === 0 ? (

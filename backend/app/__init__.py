@@ -3,6 +3,9 @@ from flask_cors import CORS
 from app.config import setting
 from app.models.schema import db, UserSchema
 from sqlalchemy import text
+from dotenv import load_dotenv
+import os
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -12,6 +15,7 @@ def create_app() -> Flask:
     register_blueprints(app)
     db_connection_test(app)
 
+    load_dotenv()
     return app
 
 
@@ -30,6 +34,9 @@ def register_blueprints(app: Flask):
     
     from app.controllers.investing import inv
     app.register_blueprint(inv)
+    
+    from app.controllers.completions import completions
+    app.register_blueprint(completions)
 
 
 

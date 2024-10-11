@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+from openai import OpenAI
 
+openai_client = OpenAI()
 
 class BaseRequest(BaseModel):
     user_id: int

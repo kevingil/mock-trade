@@ -1,10 +1,8 @@
+from . import development, production
+import os
 
 
 __all__ = ['setting']
-
-import os
-
-from . import development, production
 
 setting_dict = {
     "development": lambda: development,
