@@ -5,8 +5,11 @@ An app to allow you to trade stocks and options without real money.
 
 
 ![ss](/frontend/public/screenshot-1.png)
+![ss](/frontend/public/sketch-1.png)
 ![ss](/frontend/public/screenshot-2.png)
+![ss](/frontend/public/sketch-2.png)
 ![ss](/frontend/public/screenshot-3.png)
+![ss](/frontend/public/sketch-3.png)
 
 
 
