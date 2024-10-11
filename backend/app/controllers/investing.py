@@ -18,6 +18,7 @@ class Holding(BaseModel):
     opening_price: float
     delta: float
     delta_percentage: float
+    thumbnail: str
 
 
 class InvestingRequest(BaseRequest):
@@ -32,6 +33,8 @@ class InvestingResponse(BaseModel):
     delta: float
     delta_percentage: float
 
+
+thumnbail_base = "https://logo.clearbit.com/"
 
 inv = Blueprint("investing", __name__)
 
@@ -129,6 +132,7 @@ def investing(user_id):
                     * (info.get("currentPrice", 0) - info.get("previousClose", 0))
                     / info.get("previousClose", 0)
                 ),
+                thumbnail=thumnbail_base + info.get("website"),
             )
         )
         

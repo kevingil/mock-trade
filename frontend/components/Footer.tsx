@@ -14,7 +14,7 @@ export const Footer = () => {
             className="font-semibold items-center text-xl flex dark:text-white text-gray-900 dark:fill-white fill-gray-900 hover:text-primary hover:fill-primary">
 
             <HoodIcon className="w-10" />
-            SellScaleHood
+            Mock Trade
           </a>
         </div>
 

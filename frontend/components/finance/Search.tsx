@@ -16,10 +16,18 @@ type Result = {
   ticketCode: string
 }
 
+type RecentSearch = {
+  ticketName: string
+  ticketCode: string
+  date: string
+}
+
+
 export function Search() {
   const [isFocused, setIsFocused] = useState(false);
   const [keyword, setKeyword] = useState("");
-  const [results, setResults] = useState<Result[]>([]); 
+  const [results, setResults] = useState<Result[]>([]);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -32,6 +40,16 @@ export function Search() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+
+  useEffect(() => {
+    // Load recent searches from localStorage when component mounts
+    const storedSearches = localStorage.getItem('recentSearches');
+    if (storedSearches) {
+      setRecentSearches(JSON.parse(storedSearches));
+    }
+  }, []);
+
+
   const handleSearch = async (keyword: string) => {
     if (!keyword) {
       setResults([]);
@@ -42,7 +60,7 @@ export function Search() {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const data: Result[] = await response.json(); 
+      const data: Result[] = await response.json();
       setResults(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -54,6 +72,25 @@ export function Search() {
     setKeyword(event.target.value);
     handleSearch(event.target.value);
   }
+
+  const saveRecentSearch = (result: Result) => {
+    const newSearch: RecentSearch = {
+      ticketName: result.ticketName,
+      ticketCode: result.ticketCode,
+      date: new Date().toISOString()
+    };
+
+    setRecentSearches(prevSearches => {
+      const updatedSearches = [newSearch, ...prevSearches.filter(search => 
+        search.ticketCode !== newSearch.ticketCode
+      )].slice(0, 4);
+
+      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      return updatedSearches;
+    });
+  }
+
+
 
   return (
     <div className="">
@@ -74,7 +111,21 @@ export function Search() {
         {isFocused && (
           <CommandList>
             {results.length === 0 || keyword === "" || !results || !Array.isArray(results) ? (
-              <CommandEmpty>No results found.</CommandEmpty>
+              <div>
+                <CommandEmpty>Recent searches</CommandEmpty>
+                {recentSearches.map((search) => (
+                  <CommandItem key={search.ticketCode} className="cursor-pointer p-0">
+                    <Link
+                      className="flex flex-row items-center rounded w-full"
+                      href={`/stock?ticker=${search.ticketCode}`}
+                      onClick={() => setIsFocused(false)}
+                    >
+                      <Activity className="mx-4 h-4 w-4" />
+                      <span className="py-4">{search.ticketCode}: {search.ticketName}</span>
+                    </Link>
+                  </CommandItem>
+                ))}
+              </div>
             ) : (
               <CommandGroup heading="Results">
                 {results.map((result) => (
@@ -82,7 +133,10 @@ export function Search() {
                     <Link
                       className="flex flex-row items-center rounded w-full"
                       href={`/stock?ticker=${result.ticketCode}`}
-                      onClick={() => setIsFocused(false)}
+                      onClick={() => {
+                        saveRecentSearch(result);
+                        setIsFocused(false);
+                      }}
                     >
                       <Activity className="mx-4 h-4 w-4" />
                       <span className="py-4">{result.ticketCode}: {result.ticketName}</span>

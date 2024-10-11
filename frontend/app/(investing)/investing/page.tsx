@@ -21,6 +21,7 @@ interface HoldingResponse {
   opening_price: number;
   delta: number;
   delta_percentage: number;
+  thumbnail: string;
 }
 
 export default function InvestingPage() {
@@ -67,7 +68,8 @@ export default function InvestingPage() {
             currentPrice: holding.current_price,
             name: holding.name,
             delta: holding.delta,
-            deltaPercentage: holding.delta_percentage
+            deltaPercentage: holding.delta_percentage,
+            thumbnail: holding.thumbnail
           }));
 
           setStocks(formattedStocks);

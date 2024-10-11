@@ -3,6 +3,14 @@
 An app to allow you to trade stocks and options without real money.
 
 
+
+![ss](/frontend/public/screenshot-1.png)
+![ss](/frontend/public/screenshot-2.png)
+![ss](/frontend/public/screenshot-3.png)
+
+
+
+
 ### Getting Started
 
 We first need a blank postgres instance running. If you have Docker, you can start one with the compose file, or you can modify the .env files to provide your own.

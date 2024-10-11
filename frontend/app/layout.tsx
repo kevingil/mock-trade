@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 
 
 export const metadata: Metadata = {
-  title: 'SellScaleHood',
+  title: 'Mock Trade',
   description: 'Free stock trading'
 }
 export const viewport: Viewport = {

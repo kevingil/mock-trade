@@ -71,7 +71,7 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
               className="ml-2 font-semibold items-center flex text-gray-900 dark:text-white fill-gray-900 dark:fill-white dark:hover:text-primary dark:hover:fill-primary hover:text-primary hover:fill-primary text-2xl"
             >
               <HoodIcon className="w-12" />
-              SellScaleHood
+              Mock Trade
             </a>
           </NavigationMenuItem>
 
@@ -89,7 +89,7 @@ export const Navbar = ({ user, isMenuOpen, setIsMenuOpen, isDropdownOpen, setIsD
                 <SheetContent side={"right"}>
                   <SheetHeader>
                     <SheetTitle className="font-bold text-xl">
-                      SellScaleHood
+                      Mock Trade
                     </SheetTitle>
                   </SheetHeader>
                   <nav className="flex flex-col items-start gap-4 text-lg mt-4">
