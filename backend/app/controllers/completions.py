@@ -94,14 +94,17 @@ def get_stock_advice():
             )
         )
     
+    print(processed_holdings)
     completion = openai_client.beta.chat.completions.parse(
         model="gpt-4o-2024-08-06",
         messages=[
             {"role": "system", "content": "You're a helpful financial assistant, \n" +
                                         "help me make an informed decision based on my portfolio. \n" +
-                                        "Question1: What is good about my portfolio?" +
-                                        "Question2: What can be improved about my portfolio?" +
-                                        "Question3: Recommend 6 stock tickers to buy"},
+                                        "Question1: What is good about my portfolio?\n" +
+                                        "Question2: What can be improved about my portfolio?\n" +
+                                        "Question3: Recommend 6 stock tickers to buy\n" +
+                                        "Review your work and remove all markdown syntax, respond with plain text only. Keep responses brief and short\n"},
+
             {"role": "user", "content": "Here's my stock portfolio: " + str(processed_holdings) + " What's your advice?"},
         ],
         response_format=CompletionResponse,

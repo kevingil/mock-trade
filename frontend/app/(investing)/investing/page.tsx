@@ -127,7 +127,7 @@ export default function InvestingPage() {
           </div>
         </div>
         <div>
-          <StockList stocks={stocks} />
+          <StockList userId={user?.id} stocks={stocks} />
         </div>
       </section>
     </main>

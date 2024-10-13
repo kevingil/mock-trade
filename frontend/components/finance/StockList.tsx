@@ -16,6 +16,7 @@ export interface Stock {
 }
 
 interface StockListProps {
+  userId: number;
   stocks: Stock[]
 }
 
@@ -29,7 +30,7 @@ interface AdviceData {
 }
 
 
-export default function StockList({ stocks }: StockListProps) {
+export default function StockList({ userId, stocks }: StockListProps) {
   const [adviceDialogOpen, setAdviceDialogOpen] = useState(false);
   const [adviceData, setAdviceData] = useState<AdviceData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ export default function StockList({ stocks }: StockListProps) {
   useEffect(() => {
     if (adviceDialogOpen && !adviceData && !loading) {
       setLoading(true);
-      fetch('http://localhost:5000/stock-advice')
+      fetch('http://localhost:5000/stock-advice?userId=' + userId)
         .then(response => response.json())
         .then((data: AdviceData) => {
           setAdviceData(data);
@@ -91,7 +92,7 @@ export default function StockList({ stocks }: StockListProps) {
               </button>
             </div>
           </DialogTrigger>
-          <DialogContent className='top-1/2'>
+          <DialogContent className='top-1/2 max-h-[80vh] overflow-y-auto'>
             <DialogHeader>
               <DialogTitle>Advice</DialogTitle>
             </DialogHeader>
