@@ -25,69 +25,74 @@ export default function TicketPage() {
   const searchParams = useSearchParams();
   const ticker = searchParams.get('ticker');
 
+  const fetchStockData = async () => {
+    if (!ticker || !dateRange.code) return;
+    let useQuery = '';
+    if (user) {
+      useQuery = `&userId=${user.id}`
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/get-stock-data?ticketCode=${ticker}&dateRange=${dateRange.code}` + useQuery,
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        let currentPrice = data.plot_points[data.plot_points.length - 1].price.toFixed(2).toString();
+        const formattedData: StockData = {
+          tickerName: data.name,
+          tickerCode: ticker,
+          currentPrice: currentPrice,
+          delta: data.delta,
+          deltaPercentage: data.delta_percentage,
+          data: data.plot_points
+        };
+
+        setStockData(formattedData);
+        setSharesHolding(data.shares_holding);
+        setTotalValue(Number(data.total_value).toFixed(2));
+        setStockCurrentPrice(currentPrice);
+        setNegativeDelta(data.delta < 0);
+      } else {
+        console.error(data.error);
+      }
+    } catch (error) {
+      console.error("Error fetching stock data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchStockData = async () => {
-      if (!ticker || !dateRange.code) return;
-      let useQuery = '';
-      if (user) {
-        useQuery = `&userId=${user.id}`
-      }
-
-      try {
-        const response = await fetch(
-          `http://localhost:5000/get-stock-data?ticketCode=${ticker}&dateRange=${dateRange.code}` + useQuery,
-        );
-        const data = await response.json();
-
-        if (response.ok) {
-          let currentPrice = data.plot_points[data.plot_points.length - 1].price.toFixed(2).toString();
-          const formattedData: StockData = {
-            tickerName: data.name,
-            tickerCode: ticker,
-            currentPrice: currentPrice,
-            delta: data.delta,
-            deltaPercentage: data.delta_percentage,
-            data: data.plot_points
-          };
-
-          setStockData(formattedData);
-          setSharesHolding(data.shares_holding);
-          setTotalValue(Number(data.total_value).toFixed(2));
-          setStockCurrentPrice(currentPrice);
-          setNegativeDelta(data.delta < 0);
-        } else {
-          console.error(data.error);
-        }
-      } catch (error) {
-        console.error("Error fetching stock data:", error);
-      }
-    };
-
     fetchStockData();
   }, [ticker, dateRange]);
 
-  useEffect(() => {
-    const fetchBuyingPower = async () => {
-      if (!user?.id) return;
-      try {
-        const response = await fetch(`http://localhost:5000/balance/${user?.id}`);
-        const data = await response.json();
+  const fetchBuyingPower = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`http://localhost:5000/balance/${user?.id}`);
+      const data = await response.json();
 
-        if (response.ok) {
-          setBuyingPower(data.balance);
-        } else {
-          console.error(data.error);
-        }
-      } catch (error) {
-        console.error("Error fetching buying power:", error);
+      if (response.ok) {
+        setBuyingPower(data.balance);
+      } else {
+        console.error(data.error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching buying power:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchBuyingPower();
   }, [user?.id]);
 
   const handleDateRangeChange = (range: string) => {
     setDateRange({ code: range });
+  };
+
+  const handleOrderPlaced = () => {
+    fetchStockData();
+    fetchBuyingPower();
   };
 
   return (
@@ -149,6 +154,7 @@ export default function TicketPage() {
             sharesHolding={sharesHolding ? sharesHolding : 0.00}
             userId={user?.id}
             tickerPrice={stockCurrentPrice ? stockCurrentPrice : 0.00}
+            onOrderSuccess={handleOrderPlaced}
           />
           {user?.id &&
             <div className='flex my-4'>

@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { useRouter } from 'next/navigation'
 
 interface StockOrderFormProps {
   tickerCode: string
@@ -18,6 +18,7 @@ interface StockOrderFormProps {
   sharesHolding: number
   userId: number | undefined
   delta: number
+  onOrderSuccess: () => void;
 }
 
 enum TransactionType {
@@ -33,20 +34,27 @@ export type StockOrderRequest = {
   userId: number
 }
 
-export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, sharesHolding, delta, userId }: StockOrderFormProps) {
+export type TransactionMessage = {
+  status: string
+  message: string
+  amount: number
+}
+
+export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, sharesHolding, delta, userId, onOrderSuccess }: StockOrderFormProps) {
   const [buyType, setBuyType] = useState<'dollars' | 'shares'>('dollars')
   const [transactionType, setTransactionType] = useState<TransactionType>(TransactionType.BUY)
   const [amount, setAmount] = useState<string>('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast();
 
   let estimatedQuantity = buyType === 'dollars' ? Number(amount) / tickerPrice : undefined
   let estimatedAmount = buyType === 'shares' ? Number(amount) * tickerPrice : undefined
 
+  
   const handleReviewOrder = () => {
     setIsDialogOpen(true)
   }
-
   const handleConfirmOrder = async () => {
     const sharesQuantity = buyType === 'dollars' ? Number(amount) / tickerPrice : Number(amount)
     let response;
@@ -58,7 +66,7 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
       currentPrice: tickerPrice,
       userId: userId
     }
-
+  
     try {
       response = await fetch('http://localhost:5000/transaction', {
         method: 'POST',
@@ -67,12 +75,25 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
         },
         body: JSON.stringify(req),
       })
-
+  
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Transaction failed')
       }
-      window.location.reload();
+  
+      setIsDialogOpen(false)
+      setAmount('')
+      setTransactionType(TransactionType.BUY)
+      setBuyType('dollars')
+  
+      // Show success toast
+      toast({
+        title: 'Order Success',
+        description: `$${(sharesQuantity*tickerPrice).toFixed(2)} ${transactionType} order for ${tickerCode} has been placed.`,
+        duration: 10000,
+      })
+      // Refresh the balance and holdings after a successful order
+      onOrderSuccess()
 
     } catch (err) {
       if (err instanceof Error) {
@@ -80,10 +101,22 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
       } else {
         setError('An unexpected error occurred')
       }
-      // Keep the dialog open to show the error
+
+      setIsDialogOpen(false)
+      setAmount('')
+      setTransactionType(TransactionType.BUY)
+      setBuyType('dollars')
+
+      // Show error toast
+      toast({
+        title: 'Order Failed',
+        variant: "destructive",
+        description: err instanceof Error ? err.message : 'An unexpected error occurred',
+        duration: 10000,
+      })
     }
   }
-
+  
   const loggedInCard = () => {
     return (
       <>
@@ -174,16 +207,16 @@ export default function StockOrderForm({ tickerCode, tickerPrice, buyingPower, s
       <div className="flex border-b-2 my-2 mb-4 px-2">
         <button
           className={`px-4 py-3 text-center text-sm font-bold border-b-2 
-            ${transactionType === TransactionType.BUY && delta > 0 ? 'border-green-500 text-primary font-bold' : 'border-transparent '}
-            ${transactionType === TransactionType.BUY && delta < 0 ? ' border-red-500 text-red-500 font-bold' : 'border-transparent '}`}
+            ${transactionType === TransactionType.BUY && delta >= 0 ? 'border-green-500 text-primary font-bold' : ' '}
+            ${transactionType === TransactionType.BUY && delta < 0 ? ' border-red-500 text-red-500 font-bold' : ' '}`}
           onClick={() => setTransactionType(TransactionType.BUY)}
         >
           Buy {tickerCode}
         </button>
         <button
           className={`px-4 py-3 text-center text-sm font-bold border-b-2 
-            ${transactionType === TransactionType.SELL && delta > 0 ? ' border-green-500 text-primary font-bold' : 'border-transparent '}
-            ${transactionType === TransactionType.SELL && delta < 0 ? ' border-red-500 text-red-500 font-bold' : 'border-transparent '}`}
+            ${transactionType === TransactionType.SELL && delta >= 0 ? ' border-green-500 text-primary font-bold' : ' '}
+            ${transactionType === TransactionType.SELL && delta < 0 ? ' border-red-500 text-red-500 font-bold' : ' '}`}
           onClick={() => setTransactionType(TransactionType.SELL)}
         >
           Sell {tickerCode}

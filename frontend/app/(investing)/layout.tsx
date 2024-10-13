@@ -7,7 +7,7 @@ import { ScrollToTop } from '@/components/ScrollToTop';
 import { useState } from 'react';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
-
+import { Toaster } from "@/components/ui/toaster"
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -37,7 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           />
 
         {children}
-
+        <Toaster />
         <Footer />
         <ScrollToTop />
 
